@@ -1,0 +1,10 @@
+Package: tinyx-xinit-@MACHINE@
+Priority: optional
+Version: @VERSION@
+Section: headers
+Architecture: @HOST@
+Maintainer: SooChan Lim <sc.lim@samsung.com>
+Source: xinit-1.1.0
+Depends: 
+Description: xinit
+

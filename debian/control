@@ -1,0 +1,23 @@
+Source: xinit
+Section: x11
+Priority: optional
+Maintainer: Sung-Jin Park <sj76.park@samsung.com>
+Uploaders: SooChan Lim <sc1.lim@samsung.com>, Sung-Jin Park <sj76.park@samsung.com>
+Build-Depends: debhelper (>= 5.0.0), pkg-config, libx11-dev (>= 2:1.0.0-1), xutils-dev, quilt
+Standards-Version: 3.7.2.0
+
+Package: xinit
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Pre-Depends: x11-common (>= 1:7.0.0)
+Replaces: xbase-clients (<= 1:7.2.ds2-3)
+Description: X server initialisation tool
+ xinit and startx are programs which facilitate starting an X server, and 
+ loading a base X session.
+
+Package: xinit-dbg
+Architecture: any
+Section: debug
+Depends: ${shlibs:Depends}, ${misc:Depends}, xinit (=${Source-Version})
+Description: Debug package of xinit
+
