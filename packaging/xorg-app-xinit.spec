@@ -1,9 +1,9 @@
 %define pkgname xinit
 
 Summary:   X.Org X11 X Window System xinit startup scripts
-Name:      xorg-x11-%{pkgname}
+Name:      xorg-app-%{pkgname}
 Version:   1.1.0
-Release:   1
+Release:   4
 License:   MIT/X11
 Group:     User Interface/X
 URL:       http://www.x.org
@@ -11,11 +11,11 @@ URL:       http://www.x.org
 Source0:  ftp://ftp.x.org/pub/individual/app/%{pkgname}-%{version}.tar.gz
 
 BuildRequires: pkgconfig
-BuildRequires: libX11-devel
+BuildRequires: pkgconfig(x11)
 BuildRequires: autoconf
 BuildRequires: automake
 BuildRequires: libtool
-BuildRequires: xorg-x11-util-macros
+BuildRequires: pkgconfig(xorg-macros)
 Requires: xauth
 
 %description
@@ -33,15 +33,9 @@ make %{?jobs:-j%jobs}
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT
+%make_install
 
-
-
-%remove_docs
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+%docs_package
 
 %files
 %{_bindir}/xinit
