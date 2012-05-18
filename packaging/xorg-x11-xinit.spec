@@ -22,7 +22,7 @@ Requires: xauth
 X.Org X11 X Window System xinit startup scripts
 
 %prep
-%setup -q -n %{pkgname}-%{version}
+%setup -q -n %{name}-%{version}
 
 %build
 export CFLAGS="${CFLAGS} -D_F_EXIT_AFTER_XORG_AND_XCLIENT_LAUNCHED_"
