@@ -9,6 +9,7 @@ Group:     User Interface/X
 URL:       http://www.x.org
 
 Source0:  ftp://ftp.x.org/pub/individual/app/%{pkgname}-%{version}.tar.gz
+Source1001: packaging/xorg-x11-xinit.manifest 
 
 BuildRequires: pkgconfig
 BuildRequires: libx11-devel
@@ -25,6 +26,7 @@ X.Org X11 X Window System xinit startup scripts
 %setup -q -n %{name}-%{version}
 
 %build
+cp %{SOURCE1001} .
 export CFLAGS="${CFLAGS} -D_F_EXIT_AFTER_XORG_AND_XCLIENT_LAUNCHED_"
 ./autogen.sh
 ./configure --prefix=%{_prefix}
@@ -44,6 +46,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT
 
 %files
+%manifest xorg-x11-xinit.manifest
 %{_bindir}/xinit
 %{_libdir}/X11/xinit/xinitrc
 
