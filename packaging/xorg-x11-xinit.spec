@@ -1,14 +1,12 @@
-%define pkgname xinit
-
 Summary:   X.Org X11 X Window System xinit startup scripts
-Name:      xorg-x11-%{pkgname}
+Name:      xorg-x11-xinit
 Version:   1.1.0
 Release:   1
 License:   MIT/X11
 Group:     User Interface/X
 URL:       http://www.x.org
 
-Source0:  ftp://ftp.x.org/pub/individual/app/%{pkgname}-%{version}.tar.gz
+Source0:  %{name}-%{version}.tar.gz
 Source1001: packaging/xorg-x11-xinit.manifest 
 
 BuildRequires: pkgconfig
@@ -23,7 +21,7 @@ Requires: xauth
 X.Org X11 X Window System xinit startup scripts
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q
 
 %build
 cp %{SOURCE1001} .
