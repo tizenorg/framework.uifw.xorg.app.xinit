@@ -26,34 +26,41 @@
  * prior written authorization.
  */
 
-#include <string.h>
-#include <stdio.h>
-
-#ifndef SCRIPTDIR
-#define SCRIPTDIR="/usr/X11/lib/X11/xinit/privileged_startx.d"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
 #endif
 
-static void usage(const char *prog) {
-    fprintf(stderr, "%s: usage\n", prog);
-    fprintf(stderr, "    %s [-d [<script dir>]]\n\n", prog);
-    fprintf(stderr, "              -d: Passed when called from launchd to denote server-mode.\n");
-    fprintf(stderr, "    <script dir>: Directory to use instead of %s\n", SCRIPTDIR);
-}
+#include <mach/mach.h>
+#include <mach/mach_error.h>
+#include <servers/bootstrap.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
-int client_main(void);
-int server_main(const char *dir);
+#include <AvailabilityMacros.h>
 
-int main(int argc, char *argv[]) {
+#include "privileged_startx.h"
 
-    if(argc == 1) {
-        return client_main();
-    } else if(!strncmp(argv[1], "-d", 2)) {
-        if(argc == 2)
-            return server_main(NULL);
-        else if(argc == 3)
-            return server_main(argv[2]);
+int client_main(void) {
+    kern_return_t kr;
+    mach_port_t mp;
+    
+    kr = bootstrap_look_up(bootstrap_port, BOOTSTRAP_NAME, &mp);
+    if (kr != KERN_SUCCESS) {
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1050
+        fprintf(stderr, "privileged_startx: bootstrap_look_up(%s): %s\n", BOOTSTRAP_NAME, bootstrap_strerror(kr));
+#else
+        fprintf(stderr, "privileged_startx: bootstrap_look_up(%s): %ul\n", BOOTSTRAP_NAME, (unsigned long)kr);
+#endif
+        exit(EXIT_FAILURE);
     }
-
-    usage(argv[0]);
-    return 1;
+    
+    kr = privileged_startx(mp);
+    if (kr != KERN_SUCCESS) {
+        fprintf(stderr, "privileged_startx client: %s\n", mach_error_string(kr));
+        exit(EXIT_FAILURE);
+    }
+    
+    exit(EXIT_SUCCESS);
 }

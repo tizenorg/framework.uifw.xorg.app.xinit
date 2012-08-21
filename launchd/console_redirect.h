@@ -1,4 +1,4 @@
-/* Copyright (c) 2008 Apple Inc.
+/* Copyright (c) 2011 Apple Inc.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation files
@@ -26,31 +26,19 @@
  * prior written authorization.
  */
 
-#include <mach/mach.h>
-#include <mach/mach_error.h>
-#include <servers/bootstrap.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
+#ifndef _XQUARTZ_CONSOLE_REDIRECT_H_
+#define _XQUARTZ_CONSOLE_REDIRECT_H_
 
-#include "privileged_startx.h"
+#include <asl.h>
 
-int client_main(void) {
-    kern_return_t kr;
-    mach_port_t mp;
-    
-    kr = bootstrap_look_up(bootstrap_port, BOOTSTRAP_NAME, &mp);
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr, "bootstrap_look_up(): %s\n", bootstrap_strerror(kr));
-        exit(EXIT_FAILURE);
-    }
-    
-    kr = privileged_startx(mp);
-    if (kr != KERN_SUCCESS) {
-        fprintf(stderr, "privileged_startx client: %s\n", mach_error_string(kr));
-        exit(EXIT_FAILURE);
-    }
-    
-    exit(EXIT_SUCCESS);
-}
+/* The given fd is replaced with a pipe.  Anything written to it will will be
+ * logged to ASL.
+ */
+int xi_asl_capture_fd(aslclient asl, aslmsg msg, int level, int fd);
+
+/* The given fd is read from and passed along to ASL until all write ends of the
+ * pipe are closed. Once the last writer has closed the pipe, we close our end.
+ */
+int xi_asl_log_fd(aslclient asl, aslmsg msg, int level, int fd);
+
+#endif

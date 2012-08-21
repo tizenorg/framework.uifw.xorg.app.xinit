@@ -33,11 +33,15 @@ privstartxdir = $(xinitrcdir)/privileged_startx.d
 xinitrc_PROGRAMS = privileged_startx
 privstartx_SCRIPTS = 10-tmpdirs 20-font_cache
 
-AM_CPPFLAGS = -DXINITDIR=\"$(xinitrcdir)\" -DSCRIPTDIR=\"$(privstartxdir)\" -DBINDIR=\"$(bindir)\"
+AM_CPPFLAGS = -I$(srcdir)/.. -DXINITDIR=\"$(xinitrcdir)\" -DSCRIPTDIR=\"$(privstartxdir)\" -DBINDIR=\"$(bindir)\"
+CPP_FILES_FLAGS = -DXINITDIR="$(xinitrcdir)" -DSCRIPTDIR="$(privstartxdir)" -DBINDIR="$(bindir)" -DBUNDLE_ID_PREFIX="$(bundleidprefix)"
 
-CPP_FILES_FLAGS = -DXINITDIR="$(xinitrcdir)" -DSCRIPTDIR="$(privstartxdir)" -DBINDIR="$(bindir)"
+if TIGER_LAUNCHD
+CPP_FILES_FLAGS += -DTIGER_LAUNCHD
+endif
 
 dist_privileged_startx_SOURCES = \
+	$(srcdir)/../console_redirect.c \
 	server.c \
 	client.c \
 	privileged_startx.c
@@ -52,7 +56,10 @@ BUILT_SOURCES = \
 	privileged_startxServer.h \
 	privileged_startx.h
 
-launchdaemons_PRE = org.x.privileged_startx.plist.cpp
+$(bundleidprefix).privileged_startx.plist.cpp: privileged_startx.plist.cpp  
+	cp $< $@
+
+launchdaemons_PRE = $(bundleidprefix).privileged_startx.plist.cpp
 launchdaemons_DATA = $(launchdaemons_PRE:plist.cpp=plist)
 
 10-tmpdirs: 10-tmpdirs.cpp Makefile
@@ -61,14 +68,15 @@ launchdaemons_DATA = $(launchdaemons_PRE:plist.cpp=plist)
 CLEANFILES = \
 	$(privstartx_SCRIPTS) \
 	$(BUILT_SOURCES) \
-	$(launchdaemons_DATA)
+	$(launchdaemons_DATA) \
+	$(bundleidprefix).privileged_startx.plist.cpp
 
 EXTRA_DIST = \
 	10-tmpdirs.cpp \
 	20-font_cache.cpp \
-	org.x.privileged_startx.plist.cpp \
+	privileged_startx.plist.cpp \
 	privileged_startx.defs \
 	privileged_startx_types.h
 
-$(BUILT_SOURCES): privileged_startx.defs
-	mig -sheader privileged_startxServer.h privileged_startx.defs
+$(BUILT_SOURCES): $(srcdir)/privileged_startx.defs
+	mig -sheader privileged_startxServer.h $(srcdir)/privileged_startx.defs

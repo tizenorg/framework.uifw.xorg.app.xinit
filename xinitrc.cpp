@@ -1,5 +1,4 @@
 XCOMM!SHELL_CMD
-XCOMM $Xorg: xinitrc.cpp,v 1.3 2000/08/17 19:54:30 cpqbld Exp $
 
 userresources=$HOME/.Xresources
 usermodmap=$HOME/.Xmodmap
@@ -85,16 +84,12 @@ fi
 XCOMM This is the fallback case if nothing else is executed above
 #endif /* !defined(__SCO__)  && !defined(__UNIXWARE__) */
 
-#ifdef __APPLE__
-
 if [ -d XINITDIR/xinitrc.d ] ; then
 	for f in XINITDIR/xinitrc.dXSLASHGLOB.sh ; do
 		[ -x "$f" ] && . "$f"
 	done
 	unset f
 fi
-
-#endif
 
 TWM &
 XCLOCK -geometry 50x50-1+1 &
