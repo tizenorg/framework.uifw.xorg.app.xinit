@@ -2,7 +2,7 @@
 
 Summary:   X.Org X11 X Window System xinit startup scripts
 Name:      xorg-x11-xinit
-Version:   1.3.2
+Version:   1.4.2
 Release:   5
 License:   MIT
 Group:     User Interface/X
@@ -40,6 +40,7 @@ BuildRequires: xorg-x11-xutils-dev
 # next two are for localuser.sh
 #Requires: coreutils
 Requires: xorg-x11-server-utils
+Requires: xkeyboard-config
 
 %package session
 Summary: Display manager support for ~/.xsession and ~/.Xclients
@@ -100,6 +101,7 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %remove_docs
 
 %files
+%manifest xinit.manifest
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 #%doc COPYING README ChangeLog

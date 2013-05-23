@@ -95,6 +95,10 @@ static char *default_display = ":0";        /* choose most efficient */
 static char *default_client[] = {"xterm", "-geometry", "+1+1", "-n", "login", NULL};
 static char *serverargv[100];
 static char *clientargv[100];
+#ifdef _F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
+static char *wmargv[100];
+static char **wm = wmargv;
+#endif//_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
 static char **server = serverargv + 2;        /* make sure room for sh .xserverrc args */
 static char **client = clientargv + 2;        /* make sure room for sh .xinitrc args */
 static char *displayNum = NULL;
@@ -103,12 +107,19 @@ static Display *xd = NULL;            /* server connection */
 int status;
 int serverpid = -1;
 int clientpid = -1;
+#ifdef _F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
+int wmpid = -1;
+#endif//_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
 volatile int gotSignal = 0;
 
 static void Execute(char **vec);
 static Bool waitforserver(void);
 static Bool processTimeout(int timeout, char *string);
 static int startServer(char *server[]);
+#ifdef _F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
+static void set_wm_user_groups();
+static int startWM(void);
+#endif//_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
 static int startClient(char *client[]);
 static int ignorexio(Display *dpy);
 static void shutdown(void);
@@ -291,6 +302,9 @@ main(int argc, char *argv[])
 #endif
 
     if (startServer(server) > 0
+#ifdef _F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
+	&& startWM() > 0
+#endif//_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
         && startClient(client) > 0) {
 #ifdef _F_EXIT_AFTER_XORG_AND_XCLIENT_LAUNCHED_
         exit(0);
@@ -475,6 +489,106 @@ startServer(char *server[])
 
     return(serverpid);
 }
+
+#ifdef _F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
+static void
+set_wm_user_groups()
+{
+	char *cp;
+	int uid = -1;
+	int gid = -1;
+
+	//get user id for wm
+	if(cp = getenv("WMUSERID"))
+		if (sscanf(cp, "%d", &uid) <= 0)
+			uid = -1;
+
+	//get group id for wm
+	if(cp = getenv("WMGROUPID"))
+		if (sscanf(cp, "%d", &gid) <= 0)
+			gid = -1;
+
+	//init groups
+	{
+		int res;
+		cp = getenv("WMUSER");
+
+		if(cp && (uid > 0) && (gid > 0))
+		{
+			res = initgroups(cp, (gid_t)gid);
+
+			if(res)
+				fprintf(stderr, "Failed to set groups !(errno=%d)\n", errno);
+		}
+		else
+			fprintf(stderr, "Failed to set groups !(getenv(WMUSER) : NULL)\n");
+	}
+
+	//set group id and effective group id
+	if((gid > 0) && setgid((gid_t)gid) && setegid((gid_t)gid))
+		fprintf(stderr, "Fail to set group id to %d. errno=%d\n", gid, errno);
+
+	//set user id and effective user id
+	if((uid > 0) && setuid((uid_t)uid) && seteuid((uid_t)uid))
+		fprintf(stderr, "Fail to set user id to %d. errno=%d\n", uid, errno);
+
+	//set USER environment variable
+	if(cp = getenv("WMUSER"))
+		setenv("USER", cp, 1);
+
+	//set HOME environment variable
+	if(cp = getenv("WMUSERHOME"))
+		setenv("HOME", cp, 1);
+}
+
+static int
+startWM(void)
+{
+    char *cp;
+    char wmrc_buf[256] = { 0, };
+
+    set_environment();
+
+    wmrc_buf[0] = '\0';
+    if ((cp = getenv("WMRC")) != NULL)
+    {
+	snprintf(wmrc_buf, sizeof(wmrc_buf), "%s", cp);
+    }
+    else
+    {
+       wmpid = 1;
+	return wmpid;
+    }
+
+    if(!access(wmrc_buf, F_OK))
+	wm[0] = wmrc_buf;
+    else
+	goto out;
+
+    wmpid = fork();
+
+    switch(wmpid) {
+    case 0:
+        setpgid(0,getpid());
+        set_wm_user_groups();
+
+        Execute(wm);
+
+        Error("unable to run wm\"%s\"", wm[0]);
+        exit(EXIT_FAILURE);
+        break;
+    case -1:
+        break;
+    default:
+        return wmpid;
+    }
+
+out:
+    wmpid = -1;
+
+    return(wmpid);
+}
+#endif//_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_
 
 static void
 setWindowPath(void)
