@@ -2,7 +2,7 @@
 
 Summary:   X.Org X11 X Window System xinit startup scripts
 Name:      xorg-x11-xinit
-Version:   1.4.2
+Version:   1.4.3
 Release:   5
 License:   MIT
 Group:     User Interface/X
