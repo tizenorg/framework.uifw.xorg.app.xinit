@@ -40,6 +40,7 @@ in this Software without prior written authorization from The Open Group.
 #include <errno.h>
 #include <setjmp.h>
 #include <stdarg.h>
+#include <grp.h>
 
 #ifdef __APPLE__
 #include <AvailabilityMacros.h>
