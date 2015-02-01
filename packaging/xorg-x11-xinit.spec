@@ -2,9 +2,8 @@
 
 Summary:   X.Org X11 X Window System xinit startup scripts
 Name:      xorg-x11-xinit
-Version:   1.4.5
+Version:   1.4.6
 Release:   5
-VCS:       framework/uifw/xorg/app/xinit#REBASE-11-gf137e6d3cf419ecb36561df4d542550e10b9cb18
 License:   MIT
 Group:     User Interface/X
 URL:       http://www.x.org

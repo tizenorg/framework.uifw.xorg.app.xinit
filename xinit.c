@@ -470,7 +470,11 @@ startServer(char *server[])
         /*
          * don't nice server
          */
+#if 0
+        // We don't want to use setpriority().
+        // Instead of that, priority will be rearranged by service file in systemd.
         setpriority(PRIO_PROCESS, serverpid, -1);
+#endif
 
         errno = 0;
         if(! processTimeout(0, "")) {
