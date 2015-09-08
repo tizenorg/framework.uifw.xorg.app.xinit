@@ -1,8 +1,8 @@
-%define _unpackaged_files_terminate_build 0 
+%define _unpackaged_files_terminate_build 0
 
 Summary:   X.Org X11 X Window System xinit startup scripts
 Name:      xorg-x11-xinit
-Version:   1.3.2
+Version:   1.4.6
 Release:   5
 License:   MIT
 Group:     User Interface/X
@@ -40,6 +40,7 @@ BuildRequires: xorg-x11-xutils-dev
 # next two are for localuser.sh
 #Requires: coreutils
 Requires: xorg-x11-server-utils
+Requires: xkeyboard-config
 
 %package session
 Summary: Display manager support for ~/.xsession and ~/.Xclients
@@ -59,7 +60,7 @@ Allows legacy ~/.xsession and ~/.Xclients files to be used from display managers
 
 %build
 autoreconf
-./configure --prefix=%{_prefix} CFLAGS="${CFLAGS} -g -D_F_EXIT_AFTER_XORG_AND_XCLIENT_LAUNCHED_ "
+./configure --prefix=%{_prefix} CFLAGS="${CFLAGS} -g -D_F_EXIT_AFTER_XORG_AND_XCLIENT_LAUNCHED_ -D_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_ -D_F_SET_DELAY_TIME_TO_WAIT_SERVER_ "
 
 # FIXME: Upstream should default to XINITDIR being this.  Make a patch to
 # Makefile.am and submit it in a bug report or check into CVS.
@@ -70,7 +71,9 @@ make %{?jobs:-j%jobs} XINITDIR=%{_sysconfdir}/X11/xinit
 # Makefile.am and submit it in a bug report or check into CVS.
 #make install DESTDIR=$RPM_BUILD_ROOT XINITDIR=%{_sysconfdir}/X11/xinit
 #install -p -m644 -D %{SOURCE18} $RPM_BUILD_ROOT%{_datadir}/xsessions/xinit-compat.desktop
-
+rm -rf $RPM_BUILD_ROOT
+mkdir -p %{buildroot}/usr/share/license
+cp -af COPYING %{buildroot}/usr/share/license/%{name}
 make install DESTDIR=$RPM_BUILD_ROOT
 
 # Install Red Hat custom xinitrc, etc.
@@ -98,7 +101,9 @@ make install DESTDIR=$RPM_BUILD_ROOT
 %remove_docs
 
 %files
+%manifest xinit.manifest
 %defattr(-,root,root,-)
+/usr/share/license/%{name}
 #%doc COPYING README ChangeLog
 #%{_bindir}/startx
 %{_bindir}/xinit
