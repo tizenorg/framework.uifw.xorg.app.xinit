@@ -59,7 +59,7 @@ Allows legacy ~/.xsession and ~/.Xclients files to be used from display managers
 #%patch3 -p1 -b .unset
 
 %build
-autoreconf
+%autogen
 ./configure --prefix=%{_prefix} CFLAGS="${CFLAGS} -g -D_F_EXIT_AFTER_XORG_AND_XCLIENT_LAUNCHED_ -D_F_LAUNCH_WM_AFTER_LAUNCHING_SERVER_ -D_F_SET_DELAY_TIME_TO_WAIT_SERVER_ "
 
 # FIXME: Upstream should default to XINITDIR being this.  Make a patch to
